@@ -2,7 +2,6 @@ import openai
 import os
 import random
 import datetime
-import csv
 from fpdf import FPDF
 from openpyxl import Workbook
 
@@ -24,7 +23,7 @@ company_profile = {
 # Function to call OpenAI API for content generation
 def generate_text(prompt):
     response = openai.ChatCompletion.create(
-        model="gpt-4o",
+        model="gpt-4o-mini",
         messages=[{"role": "user", "content": prompt}],
         api_key=OPENAI_API_KEY
     )
@@ -35,26 +34,21 @@ def generate_pdf(company_profile, title):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", 'B', 16)
-    
     pdf.cell(200, 10, title, ln=True, align='C')
     pdf.ln(10)
 
-    # Generate fake content using ChatGPT
     prompt = f"Write a fake confidential report for {company_profile['name']} named {title}."
     fake_content = generate_text(prompt)
 
-    revisions = 3
-    for _ in range(revisions):
+    for _ in range(3):
         fake_content = grade_response(fake_content, prompt)
 
     pdf.set_font("Arial", size=12)
-    pdf.multi_cell(0, 10, fake_content)
+    pdf.multi_cell(0, 10, fake_content.encode('latin-1', 'replace').decode('latin-1'))
 
-    # Save the PDF
-    filename = f"{OUTPUT_DIR}/{title}_{company_profile['name']}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
-    pdf.output(filename)
+    filename = f"{OUTPUT_DIR}/{title}_{company_profile['name']}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.pdf".strip()
+    pdf.output(filename, 'F')
     print(f"Generated PDF: {filename}")
-
 
 # Function to generate a honeypot Excel file
 def generate_excel(company_profile, title):
@@ -62,60 +56,50 @@ def generate_excel(company_profile, title):
     ws = wb.active
     ws.title = title
 
-    # Header row
     headers = ["Date", "Transaction ID", "Amount", "Account", "Description"]
     ws.append(headers)
 
-    # Generate fake transactions using ChatGPT
     prompt = f"Generate 10 fake financial transactions for {company_profile['name']}. Include Date, Transaction ID, Amount, Account, and Description."
     transactions = generate_text(prompt)
 
-    revisions = 3
-    for _ in range(revisions):
+    for _ in range(3):
         transactions = grade_response(transactions, prompt)
-    
-    transactions = transactions.split("\n")
 
-    # Fill the Excel sheet
-    for row in transactions:
+    for row in transactions.split("\n"):
         ws.append(row.split(", "))
 
-    # Save the Excel file
-    filename = f"{OUTPUT_DIR}/{company_profile['name']}_Financial_Records_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx"
+    filename = f"{OUTPUT_DIR}/{title}_{company_profile['name']}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx".strip()
     wb.save(filename)
     print(f"Generated Excel: {filename}")
 
 # Function to generate a honeypot text file
 def generate_text_file(company_profile, title):
-    # Generate fake content using ChatGPT
     prompt = f"Generate a fake internal memo about {random.choice(company_profile['industry_keywords'])} for {company_profile['name']} named {title}."
     fake_content = generate_text(prompt)
 
-    revisions = 3
-    for _ in range(revisions):
+    for _ in range(3):
         fake_content = grade_response(fake_content, prompt)
 
-    # Save the text file
-    filename = f"{OUTPUT_DIR}/{company_profile['name']}_{title}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.txt"
+    filename = f"{OUTPUT_DIR}/{title}_{company_profile['name']}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.txt".strip()
     with open(filename, "w", encoding="utf-8") as file:
         file.write(fake_content)
     
     print(f"Generated Text File: {filename}")
-    
-# Generate good titles for company profile honeypot files with chatgpt
-def generate_title(company_profile, num):
-    prompt = f"Generate a list of {num} titles for honeypot files related to {company_profile['name']} in the {company_profile['sector']} sector. Return no other information other than the titles separated by newline characters (do not number or label outputs in any way shape or form, do not include the company name or file extensions in the returned titles)"
-    return generate_text(prompt).split('\n')
 
-# have chatgpt grade the reeponse to a prompt and revise the output
+# Function to generate titles for honeypot files
+def generate_title(company_profile, num):
+    prompt = f"Generate a list of {num} titles for honeypot files related to {company_profile['name']} in the {company_profile['sector']} sector. Return no other information other than the titles separated by newline characters (do not number or label outputs in any way shape or form, do not include the company name or file extensions in the returned titles). Maximum length of a title is 25 characters. Ensure titles contain no characters which cannot be included in file names such as quotation marks, slashes, spaces, etc."
+    return generate_text(prompt).strip().split('\n')
+
+# Function to grade and revise the response
 def grade_response(response, original_prompt):
-    prompt = f'Analyze the following response which was generated using the prompt "{original_prompt}" and revise it for any errors or "strange" syntax: \n {response}'
+    prompt = f'Analyze the following response which was generated using the prompt "{original_prompt}" and revise it for any errors or "strange" syntax: \n {response}. Make sure there are no illegal or otherwise "program breaking" characters in the response text and only return a revised version of the original text. Do not respond with any commentary or notes, simply respond with the revised text in a similar fashion to the original I\'ve given you.'
     return generate_text(prompt)
 
 titles = generate_title(company_profile, 5)
 
 # Generate multiple honeypot files
-for title in titles:  # Generates 5 of each type
+for title in titles:
     generate_pdf(company_profile, title)
     generate_excel(company_profile, title)
     generate_text_file(company_profile, title)
