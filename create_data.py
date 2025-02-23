@@ -110,7 +110,7 @@ def generate_title(company_profile, num):
 
 # Function to grade and revise the response
 def grade_response(response, original_prompt):
-    prompt = f'Analyze the following response which was generated using the prompt "{original_prompt}" and revise it for any errors or "strange" syntax: \n {response}. Make sure there are no illegal or otherwise "program breaking" characters in the response text and only return a revised version of the original text. Do not respond with any commentary or notes, simply respond with the revised text in a similar fashion to the original I\'ve given you.'
+    prompt = f'Analyze the following response which was generated using the prompt "{original_prompt}" and revise it for any errors or "strange" syntax: \n {response}. Make sure there are no illegal or otherwise "program breaking" characters in the response text and only return a revised version of the original text. Do not respond with any commentary or notes, simply respond with the revised text in a similar fashion to the original I\'ve given you. Make sure that at no point in the response you insinuate or hint at the fact that the data is fictional.'
     return "".join(generate_text(prompt))
 
 # titles = generate_title(company_profile, 5)

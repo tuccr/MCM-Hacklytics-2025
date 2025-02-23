@@ -7,7 +7,7 @@ st.title("Intrusion Detection")
 
 # Sidebar setup
 st.sidebar.title("Settings")
-model_filename = '../MCM_IntrudeRF.pkl'
+model_filename = 'best_intrusion_rf.pkl'
 
 # Main content
 st.markdown("""
@@ -39,7 +39,7 @@ if st.session_state.uploaded_file is not None:
                 st.write("Data before adding predictions:")
                 st.write(df.head())
                 
-                classifier.add_predictions_to_csv(model_filename, st.session_state.uploaded_file, output_filename)
+                output_df = classifier.add_predictions_to_csv(model_filename, df, output_filename)
                 
                 # Check if the file was written correctly
                 with open(output_filename, 'r') as f:
