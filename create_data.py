@@ -4,6 +4,7 @@ import random
 import datetime
 from fpdf import FPDF
 from openpyxl import Workbook
+import json
 
 # Set your OpenAI API key
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
@@ -28,6 +29,19 @@ def generate_text(prompt):
         api_key=OPENAI_API_KEY
     )
     return response["choices"][0]["message"]["content"]
+
+def get_company_profile(user_input):
+    prompt = f'Parse the user input for information about their company including the company name, sector, domain, and any relevant industry keywords. If you are not able to parse any of this information from the user input, ask the user to provide the missing information. Return information parsed from the user input as a json file and provide no other information. If you do need to ask the user to clarify something, begin your response with "I\'m Sorry" \n The user input is: "{user_input}"'
+    response = generate_text(prompt)
+    if(response.startswith("I'm Sorry")):
+        print(response)
+    company_profile = {}
+    try:
+        company_profile = json.loads(response)
+    except json.JSONDecodeError:
+        print("Failed to parse company profile from response.")
+    
+    return company_profile
 
 # Function to generate a honeypot PDF
 def generate_pdf(company_profile, title):
