@@ -1,13 +1,22 @@
+import shutil
 import streamlit as st
 import pandas as pd
 import classifier
+import os
 
 # Page setup
 st.title("Intrusion Detection")
 
+def clear_file(file_path):
+    if os.path.exists(file_path):
+        print(f"Clearing file: {file_path}")
+        # Open the file in write mode to clear its content
+        with open(file_path, "w") as file:
+            file.truncate(0)  # Clear the file content
+
 # Sidebar setup
-st.sidebar.title("Settings")
-model_filename = '../MCM_IntrudeRF.pkl'
+#st.sidebar.title("Settings")
+model_filename = 'best_intrusion_rf.pkl'
 
 # Main content
 st.markdown("""
@@ -39,13 +48,13 @@ if st.session_state.uploaded_file is not None:
                 st.write("Data before adding predictions:")
                 st.write(df.head())
                 
-                classifier.add_predictions_to_csv(model_filename, st.session_state.uploaded_file, output_filename)
+                output_df = classifier.add_predictions_to_csv(model_filename, df, output_filename)
                 
                 # Check if the file was written correctly
-                with open(output_filename, 'r') as f:
-                    content = f.read()
-                    st.write("Content of the output file:")
-                    st.text(content)
+                # with open(output_filename, 'r') as f:
+                #     content = f.read()
+                #     st.write("Content of the output file:")
+                #     st.text(content)
                 
                 output_df = pd.read_csv(output_filename)
                 st.session_state.output_df = output_df
@@ -56,17 +65,19 @@ if st.session_state.uploaded_file is not None:
         except Exception as e:
             st.error(f"Error adding predictions: {e}")
 
+ 
     if st.session_state.predictions_added:
         csv = st.session_state.output_df.to_csv(index=False).encode('utf-8')
-        st.download_button(
+        if st.download_button(
             label="Download updated CSV",
             data=csv,
             file_name='intrusion_data_with_predictions.csv',
             mime='text/csv'
-        )
+        ):
+            try:
+                clear_file('MCM-HACKALYTICS-2025/intrusion_data_with_predictions.csv')
+                #os.remove('MCM-HACKALYTICS-2025/intrusion_data_with_predictions.csv')
+                st.success("File downloaded and deleted successfully.")
+            except Exception as e:
+                st.error(f"Error deleting file: {e}")
 
-# Reset the page
-if st.button("Reset"):
-    st.session_state.uploaded_file = None
-    st.session_state.predictions_added = False
-    st.experimental_rerun()

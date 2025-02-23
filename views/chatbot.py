@@ -21,7 +21,7 @@ def zip_files(output_dir):
 
 # Streamlit UI
 st.image("assets/logo.png")
-with st.columns([2, 8, 1])[1]:
+with st.columns([2,8,1])[1]:
     st.title("Honeypot File Generator")
 st.write("Enter your company profile details:")
 user_input = st.text_area("Company Profile (JSON or descriptive text)")
@@ -29,7 +29,7 @@ user_input = st.text_area("Company Profile (JSON or descriptive text)")
 if st.button("Turn in Company Profile"):
     company_profile = get_company_profile(user_input)
     if not company_profile:
-        st.error("I'm sorry, but I need more information to gather details about your company. Kindly furnish the following information: Company Name, Sector, Domain, and Industry Keywords")
+        st.error("I'm sorry, but I need more information. Could you share a bit more context? For example, the name of the organization or group, the field or area it operates in, and any key terms related to its focus. This will help me assist you better")
     else:
         st.session_state.company_profile = company_profile
         st.success("Company profile successfully parsed!")
@@ -41,7 +41,7 @@ if "company_profile" in st.session_state:
         titles = generate_title(st.session_state.company_profile, num_files)
         if (len(titles)>num_files):
             titles = titles[:num_files]
-            print(len(titles))
+        st.write("Honeypot file creation has commenced. Processing times may vary.")
         for title in titles:
             generate_pdf(st.session_state.company_profile, title)
             generate_excel(st.session_state.company_profile, title)

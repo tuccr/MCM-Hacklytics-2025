@@ -4,14 +4,14 @@ import streamlit as st
 # --- PAGE SETUP ---
 project_2_page = st.Page(
     "views/chatbot.py",
-    title="Chat Bot",
+    title="HoneyBee",
     icon=":material/smart_toy:",
     default=True
 )
 
 project_3_page = st.Page(
     "views/analyzer.py",
-    title="Intrusion Detection",
+    title="Stinger",
     icon=":material/trending_up:"
 )
 
@@ -22,7 +22,7 @@ project_3_page = st.Page(
 # --- NAVIGATION SETUP [WITH SECTIONS]---
 pg = st.navigation(
     {
-        "Projects": [project_2_page, project_3_page],
+        "Projects": [project_2_page, project_3_page]
     }
 )
 
