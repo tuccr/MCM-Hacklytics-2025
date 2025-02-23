@@ -1,84 +1,81 @@
-import random
-import time
-import pandas as pd
 import streamlit as st
 
-import query
+import create_data
 
-
-# Streamed response emulator
-def response_generator():
-    response = random.choice(
-        [
-            "Hey there! Need help? Check out my fun YouTube channel 'CodingIsFun': https://youtube.com/@codingisfun!",
-            "Hi! What's up? Don't forget to subscribe to 'CodingIsFun': https://youtube.com/@codingisfun!",
-            "Hello! Need assistance? My YouTube channel 'CodingIsFun' is full of great tips: https://youtube.com/@codingisfun!",
-            "Hey! Got a question? Also, subscribe to 'CodingIsFun' for awesome tutorials: https://youtube.com/@codingisfun!",
-            "Hi there! How can I help? BTW, my channel 'CodingIsFun' is super cool: https://youtube.com/@codingisfun!",
-            "Hello! Looking for help? Check out 'CodingIsFun' on YouTube: https://youtube.com/@codingisfun!",
-            "Hey! Need assistance? 'CodingIsFun' YouTube channel has you covered: https://youtube.com/@codingisfun!",
-            "Hi! Got any coding questions? Don't forget to watch 'CodingIsFun': https://youtube.com/@codingisfun!",
-            "Hello! Need help? 'CodingIsFun' on YouTube is a must-see: https://youtube.com/@codingisfun!",
-            "Hey there! Any questions? My channel 'CodingIsFun' rocks: https://youtube.com/@codingisfun!",
-        ]
-    )
-    for word in response.split():
-        yield word + " "
-        time.sleep(0.05)
-
-
-
-
-with st.columns(3)[1]:
-    # st.header("hello world")
-    # st.image("https://picsum.photos/200/200")
-    st.image("assets/logo.png", width=225)
-    st.title("CHATBOT")
-
-# Initialize chat history
+# Initialize chat history and question index
 if "messages" not in st.session_state:
     st.session_state.messages = []
+if "question_index" not in st.session_state:
+    st.session_state.question_index = 0
+if "current_question_asked" not in st.session_state:
+    st.session_state.current_question_asked = False
 
+# List of questions to ask
+questions = [
+    "What is your name?",
+    "Which sector do you work in?",
+    "What is your domain?",
+    "What are the industry keywords?"
+]
 
-# File uploader for user logs
-# st.sidebar.header("Upload System Logs")
-# uploaded_file = st.sidebar.file_uploader("Upload your log file (CSV or JSON)", type=["csv", "json"])
+# Function to display chat messages
+def display_messages():
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-user_logs = None  # Placeholder for user logs
-
-# # Process uploaded logs
-# if uploaded_file is not None:
-#     file_type = uploaded_file.name.split(".")[-1]
-#     if file_type == "csv":
-#         user_logs = pd.read_csv(uploaded_file)
-#     elif file_type == "json":
-#         user_logs = pd.read_json(uploaded_file)
-
-#     st.sidebar.success("Log file uploaded successfully!")
+# Main UI setup
+with st.columns(3)[1]:
+    st.image("UI/assets/logo.png", width=225)
+    st.title("CHATBOT")
 
 # Display chat messages from history on app rerun
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+display_messages()
 
+# Check if there are more questions to ask
+if st.session_state.question_index < len(questions):
+    # Get the current question
+    current_question = questions[st.session_state.question_index]
+    
+    # Only show the input box if we haven't received an answer for the current question
+    if not st.session_state.current_question_asked:
+        answer = st.chat_input(current_question)
+        
+        if answer:
+            # Add user message to chat history
+            st.session_state.messages.append({"role": "user", "content": answer})
+            
+            # Add assistant response to chat history
+            assistant_response = f"Thank you for your answer: '{answer}'."
+            st.session_state.messages.append({"role": "assistant", "content": assistant_response})
+            
+            # Move to next question
+            st.session_state.question_index += 1
+            st.session_state.current_question_asked = False
+            
+            # Rerun the app to update the display and show the next question
+            st.rerun()
+    
+# If all questions have been answered, show a thank you message and restart option
+if st.session_state.question_index >= len(questions):
+    company_profile = {
+        "name": st.session_state.messages[0]["content"],
+        "sector": st.session_state.messages[1]["content"],
+        "domain": st.session_state.messages[2]["content"],
+        "industry_keywords": st.session_state.messages[3]["content"].split(",")
+    }
 
-
-# Accept user input
-prompt = st.chat_input("What is up?")
-st.write("\n")
-# File uploader for user logs
-uploaded_file = st.file_uploader("Upload your log file (CSV or JSON)", type=["csv", "json"])
-
-# Process uploaded logs
-if prompt or uploaded_file is not None:
-    # Add user message to chat history
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    # Display user message in chat message container
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    # Display assistant response in chat message container
-    with st.chat_message("assistant"):
-        response = st.write_stream(query.ask_openai(st.session_state.messages))
-    # Add assistant response to chat history
-    st.session_state.messages.append({"role": "assistant", "content": response})
+    titles = create_data.generate_title(company_profile, 5)
+    # Generate multiple honeypot files
+    for title in titles:
+        create_data.generate_pdf(company_profile, title)
+        create_data.generate_excel(company_profile, title)
+        create_data.generate_text_file(company_profile, title)
+    
+    st.markdown()
+    st.success("Thank you for answering all the questions!")
+    if st.button("Restart"):
+        st.session_state.messages = []
+        st.session_state.question_index = 0
+        st.session_state.current_question_asked = False
+        st.rerun()

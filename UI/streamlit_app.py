@@ -24,7 +24,7 @@ pg = st.navigation(
 # --- SHARED ON ALL PAGES ---
 # with st.sidebar:
 #   st.image("assets/logo.png", width=150)
-st.logo("assets/logo.png", size="large")
+st.logo("UI/assets/logo.png", size="large")
 #st.sidebar.markdown("Made with ❤️ by [Sven](https://youtube.com/@codingisfun)")
 
 
