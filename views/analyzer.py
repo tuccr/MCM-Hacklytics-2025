@@ -1,3 +1,4 @@
+import shutil
 import streamlit as st
 import pandas as pd
 import classifier
@@ -5,6 +6,13 @@ import os
 
 # Page setup
 st.title("Intrusion Detection")
+
+def clear_file(file_path):
+    if os.path.exists(file_path):
+        print(f"Clearing file: {file_path}")
+        # Open the file in write mode to clear its content
+        with open(file_path, "w") as file:
+            file.truncate(0)  # Clear the file content
 
 # Sidebar setup
 #st.sidebar.title("Settings")
@@ -67,7 +75,8 @@ if st.session_state.uploaded_file is not None:
             mime='text/csv'
         ):
             try:
-                os.remove('intrusion_data_with_predictions.csv')
+                clear_file('MCM-HACKALYTICS-2025/intrusion_data_with_predictions.csv')
+                #os.remove('MCM-HACKALYTICS-2025/intrusion_data_with_predictions.csv')
                 st.success("File downloaded and deleted successfully.")
             except Exception as e:
                 st.error(f"Error deleting file: {e}")
