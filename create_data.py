@@ -15,12 +15,12 @@ OUTPUT_DIR = "honeypot_files"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # Sample company profile
-company_profile = {
-    "name": "Acme Finance",
-    "sector": "Finance",
-    "domain": "acme-corp.com",
-    "industry_keywords": ["Financial Statements", "Accounts", "Internal Report"]
-}
+# company_profile = {
+#     "name": "Acme Finance",
+#     "sector": "Finance",
+#     "domain": "acme-corp.com",
+#     "industry_keywords": ["Financial Statements", "Accounts", "Internal Report"]
+# }
 
 openai.api_key = OPENAI_API_KEY
 
@@ -113,10 +113,10 @@ def grade_response(response, original_prompt):
     prompt = f'Analyze the following response which was generated using the prompt "{original_prompt}" and revise it for any errors or "strange" syntax: \n {response}. Make sure there are no illegal or otherwise "program breaking" characters in the response text and only return a revised version of the original text. Do not respond with any commentary or notes, simply respond with the revised text in a similar fashion to the original I\'ve given you.'
     return "".join(generate_text(prompt))
 
-titles = generate_title(company_profile, 5)
+# titles = generate_title(company_profile, 5)
 
-# Generate multiple honeypot files
-for title in titles:
-    generate_pdf(company_profile, title)
-    generate_excel(company_profile, title)
-    generate_text_file(company_profile, title)
+# # Generate multiple honeypot files
+# for title in titles:
+#     generate_pdf(company_profile, title)
+#     generate_excel(company_profile, title)
+#     generate_text_file(company_profile, title)
