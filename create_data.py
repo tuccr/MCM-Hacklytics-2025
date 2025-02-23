@@ -31,7 +31,7 @@ def generate_text(prompt):
     return response["choices"][0]["message"]["content"]
 
 def get_company_profile(user_input):
-    prompt = f'Parse the user input for information about their company including the company name, sector, domain, and any relevant industry keywords. If you are not able to parse any of this information from the user input, ask the user to provide the missing information. Return information parsed from the user input as a json file and provide no other information. If you do need to ask the user to clarify something, begin your response with "I\'m Sorry" \n The user input is: "{user_input}"'
+    prompt = f'Parse the user input for information about their company including company name, sector, domain, and any relevant industry keywords. If you are not able to parse out all of this information from the user input, ask the user to provide the missing information. If you have all of the information, return it as a json file and provide no other information. If you do need to ask the user to clarify something, begin your response with "I\'m Sorry" \n The user input is: "{user_input}"'
     response = generate_text(prompt)
     if(response.startswith("I'm Sorry")):
         print(response)
