@@ -22,10 +22,12 @@ company_profile = {
     "industry_keywords": ["Financial Statements", "Accounts", "Internal Report"]
 }
 
+openai.api_key = OPENAI_API_KEY
+
 # Function to call OpenAI API for content generation
 def generate_text(prompt):
     response = openai.chat.completions.create(
-        model="gpt-4",  # Use the correct model name, e.g., "gpt-4" or "gpt-3.5-turbo"
+        model="gpt-4o-mini",  # Use the correct model name, e.g., "gpt-4" or "gpt-3.5-turbo"
         messages=[{"role": "user", "content": prompt}]
     )
     yield response.choices[0].message.content
