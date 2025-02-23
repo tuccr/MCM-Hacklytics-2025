@@ -19,7 +19,7 @@ def add_predictions_to_csv(model_filename, csv_filename, output_filename):
     model = joblib.load(model_filename)
 
     # Step 4: Select features (excluding the column to exclude and session_id)
-    X = data.drop(columns=['attack_detected', 'session_id'], errors="ignore")
+    X = data.drop(columns=['session_id'], errors="ignore")
 
     # Step 5: Run predictions
     data["Predictions"] = model.predict(X)
