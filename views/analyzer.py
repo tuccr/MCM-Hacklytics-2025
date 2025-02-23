@@ -6,7 +6,7 @@ import classifier
 st.title("Intrusion Detection")
 
 # Sidebar setup
-st.sidebar.title("Settings")
+#st.sidebar.title("Settings")
 model_filename = 'best_intrusion_rf.pkl'
 
 # Main content
