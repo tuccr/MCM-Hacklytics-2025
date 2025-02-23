@@ -6,9 +6,12 @@ import datetime
 from fpdf import FPDF
 from openpyxl import Workbook
 import json
+import toml
+
+secrets = toml.load(".streamlit/secrets.toml")
 
 # Set your OpenAI API key
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+OPENAI_API_KEY = secrets.get("openai", {}).get("api_key")
 
 # Directory to save honeypot files
 OUTPUT_DIR = "honeypot_files"
