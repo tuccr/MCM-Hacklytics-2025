@@ -131,8 +131,6 @@ pyproj==3.7.1
 python-dateutil==2.8.2
 python-json-logger==3.2.1
 pytz==2025.1
-pywin32==306
-pywinpty==2.0.15
 PyYAML==6.0.2
 pyzmq==25.1.1
 referencing==0.36.2
