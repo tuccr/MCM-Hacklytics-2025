@@ -9,6 +9,12 @@ project_2_page = st.Page(
     default=True
 )
 
+project_3_page = st.Page(
+    "views/analyzer.py",
+    title="Intrusion Detection",
+    icon=":material/trending_up:"
+)
+
 
 # --- NAVIGATION SETUP [WITHOUT SECTIONS] ---
 # pg = st.navigation(pages=[about_page, project_1_page, project_2_page])
@@ -16,7 +22,7 @@ project_2_page = st.Page(
 # --- NAVIGATION SETUP [WITH SECTIONS]---
 pg = st.navigation(
     {
-        "Projects": [project_2_page],
+        "Projects": [project_2_page, project_3_page],
     }
 )
 
@@ -24,7 +30,7 @@ pg = st.navigation(
 # --- SHARED ON ALL PAGES ---
 # with st.sidebar:
 #   st.image("assets/logo.png", width=150)
-st.logo("UI/assets/logo.png", size="large")
+st.logo("assets/logo.png", size="large")
 #st.sidebar.markdown("Made with ❤️ by [Sven](https://youtube.com/@codingisfun)")
 
 
