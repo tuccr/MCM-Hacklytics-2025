@@ -10,6 +10,11 @@ st.sidebar.title("Settings")
 model_filename = '../MCM_IntrudeRF.pkl'
 
 # Main content
+st.markdown("""
+This application is designed to detect intrusions in network traffic data.
+The data is meant to resemble [this cyber intrusion detection dataset on Kaggle](https://www.kaggle.com/datasets/dnkumars/cybersecurity-intrusion-detection-dataset/data).
+""")
+
 if 'uploaded_file' not in st.session_state:
     st.session_state.uploaded_file = None
 
