@@ -1,65 +1,55 @@
-import json
 import streamlit as st
-import create_data
+import json
+import os
+import shutil
+import zipfile
+from create_data import get_company_profile, generate_title, generate_pdf, generate_excel, generate_text_file
 
-# Initialize chat history and state
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-if "company_info_complete" not in st.session_state:
-    st.session_state.company_info_complete = False
+def clear_honeypot_directory():
+    if os.path.exists("honeypot_files"):
+        shutil.rmtree("honeypot_files")
+    os.makedirs("honeypot_files", exist_ok=True)
 
-# Main UI setup
-with st.columns(3)[1]:
-    st.image("assets/logo.png", width=225)
-    st.title("CHATBOT")
+def zip_files(output_dir):
+    zip_filename = f"{output_dir}.zip"
+    with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, _, files in os.walk(output_dir):
+            for file in files:
+                file_path = os.path.join(root, file)
+                zipf.write(file_path, os.path.relpath(file_path, output_dir))
+    return zip_filename
 
-# Display chat messages from history
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+# Streamlit UI
+st.title("Honeypot File Generator")
 
-# If company info is not yet complete
-if not st.session_state.company_info_complete:
-    # Display initial question if no messages exist
-    if not st.session_state.messages:
-        with st.chat_message("assistant"):
-            st.markdown("What is your company profile?")
+st.write("Enter your company profile details:")
+user_input = st.text_area("Company Profile (JSON or descriptive text)")
 
-    # Get user input
-    user_input = st.chat_input("Tell me about your company")
+if st.button("Submit Company Profile"):
+    company_profile = get_company_profile(user_input)
+    if not company_profile:
+        st.error("Invalid company profile format. Please enter a valid response.")
+    else:
+        st.session_state.company_profile = company_profile
+        st.success("Company profile successfully parsed!")
 
-    if user_input:
-        # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": user_input})
-
-        # Display a processing message
-        with st.chat_message("assistant"):
-            st.markdown("Processing your data...please wait...")
-
-        # Get company profile using the existing function
-        company_profile = create_data.get_company_profile(user_input)
-
-        if isinstance(company_profile, dict) and company_profile:
-            # Generate files
-            titles = create_data.generate_title(company_profile, 5 )
-            for title in titles:
-                create_data.generate_pdf(company_profile, title)
-                create_data.generate_excel(company_profile, title)
-                create_data.generate_text_file(company_profile, title)
-
-            # Add success message to chat history
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": "Thank you for providing your company information!"
-            })
-            st.session_state.company_info_complete = True
-
-        # Rerun to update the UI
-        st.rerun()
-
-# Show restart button when complete
-if st.session_state.company_info_complete:
-    if st.button("Restart"):
-        st.session_state.messages = []
-        st.session_state.company_info_complete = False
-        st.rerun()
+if "company_profile" in st.session_state:
+    num_files = st.number_input("Enter the number of honeypot files to generate:", min_value=1, max_value=50, step=1)
+    if st.button("Generate Files"):
+        clear_honeypot_directory()
+        titles = generate_title(st.session_state.company_profile, num_files)
+        if (len(titles)>num_files):
+            titles = titles[:num_files]
+            print(len(titles))
+        for title in titles:
+            generate_pdf(st.session_state.company_profile, title)
+            generate_excel(st.session_state.company_profile, title)
+            generate_text_file(st.session_state.company_profile, title)
+        
+        zip_path = zip_files("honeypot_files")
+        
+        with open(zip_path, "rb") as f:
+            st.download_button("Download Honeypot Files", f, file_name="honeypot_files.zip", mime="application/zip")
+        
+        clear_honeypot_directory()
+        os.remove(zip_path)
